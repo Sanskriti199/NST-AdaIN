@@ -1,0 +1,18 @@
+# Python environment
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Uploaded images
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Logs
+*.log

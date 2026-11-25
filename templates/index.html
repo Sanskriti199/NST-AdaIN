@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AETHERA | Neural Style Transfer Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--lilac:#E6BDF4;--peony:#E79BCF;--violet:#8B7EE4;--cobalt:#3974E1;--ink:#011A54;--paper:#FBF6FD;--serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.65}
+img{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 1.25rem}
+section{padding:5.5rem 0}
+.dark{background:var(--ink);color:#fff}
+.soft{background:linear-gradient(180deg,#F3DDF9,var(--paper))}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.15}
+h2{font-size:clamp(2rem,4vw,3rem);margin-bottom:.75rem}
+.sub{max-width:60ch;opacity:.8;margin-bottom:2.5rem}
+.btn{display:inline-block;border:0;cursor:pointer;font:600 1rem var(--sans);padding:.9rem 1.8rem;border-radius:999px;text-decoration:none;transition:transform .2s,box-shadow .2s;background:linear-gradient(135deg,var(--cobalt),var(--violet));color:#fff;box-shadow:0 10px 24px -10px var(--violet)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 16px 28px -10px var(--cobalt)}
+.btn.ghost{background:transparent;border:1.5px solid currentColor;box-shadow:none}
+.btn.small{padding:.55rem 1.2rem;font-size:.9rem}
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(1,26,84,.82);backdrop-filter:blur(12px);color:#fff;border-bottom:1px solid rgba(230,189,244,.15)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:var(--serif);font-size:1.6rem;letter-spacing:.14em;text-decoration:none;display:flex;align-items:center;gap:.6rem}
+.logo i{width:22px;height:22px;border-radius:50%;background:conic-gradient(var(--lilac),var(--peony),var(--violet),var(--cobalt),var(--lilac))}
+.links{display:flex;gap:1.5rem;list-style:none}
+.links a{text-decoration:none;font-size:.92rem;opacity:.85;position:relative;padding:.3rem 0}
+.links a::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--peony);transition:width .25s}
+.links a:hover{opacity:1}.links a:hover::after{width:100%}
+.burger{display:none;background:none;border:0;color:#fff;font-size:1.6rem;cursor:pointer}
+@media(max-width:900px){.burger{display:block}.links{position:absolute;top:64px;left:0;right:0;flex-direction:column;gap:0;background:var(--ink);padding:.5rem 1.25rem 1rem;display:none}.links.open{display:flex}.links a{display:block;padding:.8rem 0}}
+/* hero */
+.hero{color:#fff;min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding-top:6rem;background:var(--ink)}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 16s ease-in-out infinite alternate}
+.b1{width:520px;height:520px;background:var(--violet);top:-12%;right:-8%}
+.b2{width:420px;height:420px;background:var(--peony);bottom:-15%;left:8%;opacity:.35;animation-delay:-6s}
+.b3{width:360px;height:360px;background:var(--cobalt);top:35%;left:42%;opacity:.4;animation-delay:-11s}
+@keyframes drift{to{transform:translate(50px,40px) scale(1.12)}}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.2fr .8fr;gap:3rem;align-items:center}
+.hero h1{font-size:clamp(3rem,7vw,5.6rem);letter-spacing:-.01em;margin-bottom:1.2rem}
+.hero h1 em{font-style:italic;color:var(--lilac)}
+.hero p.lead{font-size:1.15rem;max-width:48ch;opacity:.9;margin-bottom:1rem}
+.tag{font-family:var(--serif);font-style:italic;color:var(--lilac);max-width:46ch;margin-bottom:2rem}
+.cta{display:flex;gap:1rem;flex-wrap:wrap}
+.orbit{aspect-ratio:1;max-width:380px;margin:auto;width:100%;border-radius:50%;position:relative;background:conic-gradient(from 0deg,var(--lilac),var(--peony),var(--violet),var(--cobalt),var(--lilac));animation:spin 28s linear infinite;box-shadow:0 0 80px rgba(139,126,228,.5)}
+.orbit::before{content:'';position:absolute;inset:14%;border-radius:50%;background:var(--ink)}
+.orbit::after{content:'';position:absolute;inset:30%;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--lilac),var(--violet) 55%,var(--cobalt))}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:800px){.hero .wrap{grid-template-columns:1fr}.orbit{max-width:220px;order:-1}}
+/* workspace */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid rgba(139,126,228,.3);border-radius:22px;padding:1.4rem;box-shadow:0 20px 40px -24px rgba(1,26,84,.35)}
+.card.alt{background:linear-gradient(160deg,#fff,#F7E3FB)}
+.card h3{font-size:1.4rem;margin-bottom:.3rem}
+.card small{opacity:.7}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;min-height:290px;margin-top:1rem;border:2px dashed var(--violet);border-radius:16px;background:rgba(230,189,244,.22);cursor:pointer;text-align:center;overflow:hidden;position:relative;transition:background .2s,border-color .2s}
+.drop:hover,.drop.over{background:rgba(230,189,244,.5);border-color:var(--cobalt)}
+.drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+.drop .ico{font-size:2rem;color:var(--violet)}
+.fname{margin-top:.6rem;font-size:.85rem;opacity:.7;min-height:1.3em;word-break:break-all}
+.ctrl{margin:2rem auto 0;max-width:640px;text-align:center}
+.ctrl label{font-family:var(--serif);font-size:1.3rem}
+.aval{display:inline-block;min-width:3.2rem;margin-left:.5rem;padding:.1rem .7rem;border-radius:999px;background:var(--ink);color:#fff;font:600 .95rem var(--sans)}
+#alphaRange{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:99px;margin:1.2rem 0 .4rem;background:linear-gradient(90deg,var(--violet) 100%,#ddd 100%);outline-offset:6px}
+#alphaRange::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:4px solid var(--ink);cursor:pointer}
+#alphaRange::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--ink);cursor:pointer}
+.ends{display:flex;justify-content:space-between;font-size:.82rem;opacity:.7;margin-bottom:1.6rem}
+.alert{margin:1.5rem auto 0;max-width:640px;padding:1rem 1.2rem;border-radius:14px;background:#fff0f6;border:1.5px solid var(--peony);color:var(--ink)}
+.alert b{color:#B0215F}
+/* result */
+#resultSection{margin-top:4rem}
+.cmp{position:relative;border-radius:18px;overflow:hidden;background:#000;max-width:760px;margin:1.2rem auto;user-select:none}
+.cmp img{width:100%;height:auto;max-height:640px;object-fit:contain;margin:auto}
+.cmp .top{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--pos,50%)) 0 0)}
+.cmp .top img{height:100%;width:100%;background:#000}
+.cmp .bar{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:3px;background:#fff;transform:translateX(-50%);pointer-events:none}
+.cmp .bar::after{content:'↔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:var(--violet);color:#fff;display:grid;place-items:center}
+.cmp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize}
+.pill{position:absolute;top:10px;padding:.15rem .7rem;border-radius:99px;background:rgba(1,26,84,.8);color:#fff;font-size:.8rem}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+@media(max-width:700px){.three{grid-template-columns:1fr}}
+.three figure figcaption{font-size:.9rem;margin-top:.4rem;text-align:center}
+.three img{border-radius:12px;aspect-ratio:1;object-fit:contain;background:#f3e8f8;width:100%}
+.acts{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem}
+/* gallery */
+.flow{display:grid;grid-template-columns:1fr auto 1fr;gap:1.2rem;align-items:center;padding:1.2rem;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid rgba(230,189,244,.22);margin-bottom:1.5rem}
+.flow .ins{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.flow figure{overflow:hidden;border-radius:14px}
+.flow img{width:100%;height:240px;object-fit:contain;background:rgba(255,255,255,.08);border-radius:14px;transition:transform .4s}
+.flow figure:hover img{transform:scale(1.05)}
+.flow figcaption{font-size:.9rem;margin-top:.4rem;text-align:center;opacity:.85}
+.arrow{font-size:2rem;color:var(--peony)}
+@media(max-width:860px){.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);text-align:center}}
+@media(max-width:480px){.flow .ins{grid-template-columns:1fr}}
+/* features */
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+@media(max-width:900px){.feat{grid-template-columns:1fr 1fr}}@media(max-width:560px){.feat{grid-template-columns:1fr}}
+.feat .card{transition:transform .25s,border-color .25s}.feat .card:hover{transform:translateY(-6px);border-color:var(--cobalt)}
+.fi{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;margin-bottom:.8rem;background:linear-gradient(135deg,var(--lilac),var(--peony));color:var(--ink)}
+.feat p{font-size:.95rem;opacity:.85}
+/* method */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;counter-reset:s;position:relative}
+@media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}@media(max-width:560px){.steps{grid-template-columns:1fr}}
+.step{counter-increment:s;padding:1.4rem;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(139,126,228,.5);position:relative}
+.step::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--violet);color:var(--ink);font-weight:600;margin-bottom:.8rem}
+.step h3{font-size:1.25rem;margin-bottom:.4rem}.step p{font-size:.93rem;opacity:.85}
+.formula{margin-top:2rem;padding:1rem 1.4rem;border-radius:14px;background:rgba(230,189,244,.12);font-family:var(--serif);font-style:italic;font-size:1.1rem;text-align:center;overflow-x:auto}
+/* history */
+.hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+.hist a{text-decoration:none}.hist img{aspect-ratio:1;object-fit:cover;border-radius:12px;background:#eee;width:100%}
+.hist .d{font-size:.8rem;opacity:.7;margin-top:.3rem}
+.empty{padding:2rem;border:1.5px dashed var(--violet);border-radius:16px;text-align:center;opacity:.85}
+.note{font-size:.88rem;opacity:.75;margin:1rem 0}
+/* about */
+.about{display:grid;grid-template-columns:auto 1fr;gap:2.5rem;align-items:center}
+.av{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;font:400 3.2rem var(--serif);color:var(--ink);background:linear-gradient(135deg,var(--lilac),var(--peony) 55%,var(--violet))}
+.about p{max-width:62ch;opacity:.9;margin:.6rem 0}
+.soc{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.2rem}
+@media(max-width:640px){.about{grid-template-columns:1fr;text-align:center}.av{margin:auto}.soc{justify-content:center}}
+/* faq */
+details{background:#fff;border:1px solid rgba(139,126,228,.35);border-radius:16px;margin-bottom:.8rem;overflow:hidden}
+summary{cursor:pointer;padding:1.1rem 1.3rem;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:1rem}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-size:1.4rem;color:var(--violet);transition:transform .25s}
+details[open] summary::after{transform:rotate(45deg)}
+details[open]{border-color:var(--violet)}
+details p{padding:0 1.3rem 1.2rem;opacity:.9}
+/* footer */
+footer{background:var(--ink);color:#fff;padding:4rem 0 2rem;border-top:3px solid var(--violet)}
+.fg{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:2.5rem}
+@media(max-width:800px){.fg{grid-template-columns:1fr}}
+footer h4{font-family:var(--serif);font-weight:400;font-size:1.2rem;margin-bottom:.8rem;color:var(--lilac)}
+footer a{display:block;text-decoration:none;opacity:.85;margin-bottom:.5rem}footer a:hover{color:var(--peony);opacity:1}
+footer p{opacity:.8;font-size:.95rem}
+.copy{margin-top:2.5rem;padding-top:1.2rem;border-top:1px solid rgba(230,189,244,.2);text-align:center;font-size:.88rem;opacity:.8}
+/* loader */
+#loader{position:fixed;inset:0;z-index:100;background:rgba(1,26,84,.94);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;opacity:0;pointer-events:none;transition:opacity .3s;text-align:center;padding:1rem}
+#loader.on{opacity:1;pointer-events:all}
+.ring{width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--lilac),var(--peony),var(--violet),var(--cobalt),var(--lilac));-webkit-mask:radial-gradient(circle,transparent 56%,#000 58%);mask:radial-gradient(circle,transparent 56%,#000 58%);animation:spin 1.2s linear infinite}
+#loader h3{font-size:2rem;letter-spacing:.2em}
+/* reveal */
+.js .rv{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.js .rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}.js .rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="loader" role="status" aria-live="polite">
+  <div class="ring"></div>
+  <h3>AETHERA</h3>
+  <p>Blending your content with the style. This can take a moment.</p>
+</div>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#home"><i></i>AETHERA</a>
+    <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <ul class="links" id="links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#create">Create</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="home">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="wrap">
+    <div>
+      <h1>Art, Reimagined by <em>Intelligence.</em></h1>
+      <p class="lead">Transform ordinary images into extraordinary artistic expressions using the power of neural style transfer.</p>
+      <p class="tag">Where imagination meets intelligence, every image becomes a new expression of art.</p>
+      <div class="cta">
+        <a class="btn" href="#create">Start Creating</a>
+        <a class="btn ghost" href="#gallery">See Examples</a>
+      </div>
+    </div>
+    <div class="orbit" aria-hidden="true"></div>
+  </div>
+</header>
+
+<section class="soft" id="create">
+  <div class="wrap">
+    <h2>The Studio</h2>
+    <p class="sub">Upload a content image and a style reference, choose how strongly the style should apply, and generate your artwork.</p>
+
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      {{ form.hidden_tag() }}
+      <div class="grid2">
+        <div class="card">
+          <h3>Content image</h3><small>The photo you want to transform</small>
+          <label class="drop" id="dropContent">
+            <div id="contentPreview" style="display:contents">
+              {% if content_image %}
+                <img src="{{ url_for('send_image', filename=content_image) }}" alt="Content image">
+              {% else %}
+                <span class="ico">⬆</span><b>Drop an image or click to browse</b><small>JPG or PNG</small>
+              {% endif %}
+            </div>
+            {{ form.content(accept="image/*") }}
+          </label>
+          <div class="fname" id="contentName"></div>
+        </div>
+        <div class="card alt">
+          <h3>Style reference</h3><small>The artwork whose look you want to borrow</small>
+          <label class="drop" id="dropStyle">
+            <div id="stylePreview" style="display:contents">
+              {% if style_image %}
+                <img src="{{ url_for('send_image', filename=style_image) }}" alt="Style image">
+              {% else %}
+                <span class="ico">✦</span><b>Drop an image or click to browse</b><small>JPG or PNG</small>
+              {% endif %}
+            </div>
+            {{ form.style(accept="image/*") }}
+          </label>
+          <div class="fname" id="styleName"></div>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <label for="alphaRange">Style strength<span class="aval" id="rangeValue">1.0</span></label>
+        {{ form.alpha(id="alphaRange", type="range", min="0", max="1", step="0.1") }}
+        <div class="ends"><span>0 keeps your content</span><span>1 applies full style</span></div>
+        {{ form.submit(class="btn") }}
+      </div>
+    </form>
+
+    {% if error %}
+    <div class="alert" role="alert"><b>{{ error }}</b></div>
+    {% endif %}
+
+    {% if result_image %}
+    <div id="resultSection" data-url="{{ url_for('send_image', filename=result_image) }}">
+      <div class="card">
+        <h2 style="font-size:2rem">Your artwork</h2>
+        <p class="note" style="margin-top:0">Drag the slider to compare your original with the stylized result.</p>
+        <div class="cmp" id="cmp">
+          <img src="{{ url_for('send_image', filename=result_image) }}" alt="Stylized result">
+          {% if content_image %}
+          <div class="top"><img src="{{ url_for('send_image', filename=content_image) }}" alt="Original content"></div>
+          <span class="pill" style="left:10px">Original</span><span class="pill" style="right:10px">Stylized</span>
+          <div class="bar"></div>
+          <input type="range" min="0" max="100" value="50" id="cmpRange" aria-label="Before and after comparison">
+          {% endif %}
+        </div>
+        <div class="three">
+          {% if content_image %}<figure><img src="{{ url_for('send_image', filename=content_image) }}" alt="Content"><figcaption>Content</figcaption></figure>{% endif %}
+          {% if style_image %}<figure><img src="{{ url_for('send_image', filename=style_image) }}" alt="Style"><figcaption>Style</figcaption></figure>{% endif %}
+          <figure><img src="{{ url_for('send_image', filename=result_image) }}" alt="Result"><figcaption>Stylized</figcaption></figure>
+        </div>
+        <div class="acts">
+          <a href="{{ url_for('send_image', filename=result_image) }}" download class="btn">Download artwork</a>
+          <a href="#create" class="btn ghost" id="again">Create another</a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="dark" id="gallery">
+  <div class="wrap">
+    <h2 class="rv">Sample gallery</h2>
+    <p class="sub rv">The same portrait, restyled by two different references.</p>
+
+    <div class="flow rv">
+      <div class="ins">
+        <figure><img src="{{ url_for('send_example', filename='brad_pitt.jpg') }}" alt="Content portrait"><figcaption>Content</figcaption></figure>
+        <figure><img src="{{ url_for('send_example', filename='sketch.png') }}" alt="Sketch style reference"><figcaption>Style: sketch</figcaption></figure>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <figure><img src="{{ url_for('send_example', filename='stylized_brad_pitt.jpg') }}" alt="Sketch stylized result"><figcaption>Output</figcaption></figure>
+    </div>
+
+    <div class="flow rv">
+      <div class="ins">
+        <figure><img src="{{ url_for('send_example', filename='brad_pitt.jpg') }}" alt="Content portrait"><figcaption>Content</figcaption></figure>
+        <figure><img src="{{ url_for('send_example', filename='picasso_seated_nude_hr.jpg') }}" alt="Picasso style reference"><figcaption>Style: Picasso</figcaption></figure>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <figure><img src="{{ url_for('send_example', filename='stylized_brad_pitt (1).jpg') }}" alt="Picasso stylized result"><figcaption>Output</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2 class="rv">What AETHERA does</h2>
+    <p class="sub rv">Simple tools to turn your photos into art.</p>
+    <div class="feat">
+      <div class="card rv"><div class="fi">✦</div><h3>Neural style transfer</h3><p>A deep network repaints your photo using the visual character of any artwork.</p></div>
+      <div class="card rv"><div class="fi">∿</div><h3>Any style you like</h3><p>Use a painting, a sketch or any picture as the look you want to borrow.</p></div>
+      <div class="card rv"><div class="fi">◐</div><h3>Adjustable style strength</h3><p>The alpha slider blends between your original content and the full style.</p></div>
+      <div class="card rv"><div class="fi">❖</div><h3>Artistic transformation</h3><p>Sketches, cubism, watercolor and more: any image can act as the style reference.</p></div>
+      <div class="card rv"><div class="fi">◉</div><h3>Instant image preview</h3><p>See both images in the studio before you generate anything.</p></div>
+      <div class="card rv"><div class="fi">⬇</div><h3>Downloadable results</h3><p>Save each generated artwork straight to your device.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="soft" id="history">
+  <div class="wrap">
+    <h2>Recent transformations</h2>
+    <p class="note">Saved in this browser only (localStorage). It is not an account or permanent storage, and clearing your browser data removes it. Links only work while the server still holds the file.</p>
+    <div id="histBox"></div>
+    <p style="margin-top:1.2rem"><button class="btn ghost small" id="clearHist" type="button" style="color:var(--ink)">Clear history</button></p>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap" style="max-width:820px">
+    <h2>Questions</h2>
+    <details><summary>What is AETHERA?</summary><p>AETHERA turns your photo into a piece of art by giving it the look of a painting, sketch or any other image you choose.</p></details>
+    <details><summary>How do I use it?</summary><p>Upload the photo you want to change, upload an image with the look you like, pick how strong the effect should be, and press the button. Your artwork appears in a few moments.</p></details>
+    <details><summary>What does style strength do?</summary><p>It controls how much of the artistic look is applied. Low keeps your photo close to the original; high gives a bolder, more artistic result.</p></details>
+    <details><summary>Which images work best?</summary><p>Clear photos work well as your content. For the style, try paintings, sketches or anything with strong colors and textures.</p></details>
+    <details><summary>Which file types can I upload?</summary><p>JPG and PNG images work.</p></details>
+    <details><summary>How long does it take?</summary><p>Usually a few seconds to a minute, depending on the image size.</p></details>
+    <details><summary>Can I download my artwork?</summary><p>Yes. Press Download artwork under your result to save it to your device.</p></details>
+    <details><summary>Is it free?</summary><p>Yes, this demo is free to use.</p></details>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="fg">
+      <div>
+        <a class="logo" href="#home" style="opacity:1;margin-bottom:.8rem"><i></i>AETHERA</a>
+        <p style="font-family:var(--serif);font-style:italic;color:var(--lilac);margin-bottom:.8rem">Where imagination meets intelligence, every image becomes a new expression of art.</p>
+        <p>An AI-powered neural style transfer app.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <a href="#create">Create</a><a href="#gallery">Gallery</a><a href="#features">Features</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <a href="mailto:sanskritimittal5002@gmail.com">sanskritimittal5002@gmail.com</a>
+        <a href="https://github.com/Sanskriti199" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/sanskriti-mittal-812880289/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+    <div class="copy">© 2026 AETHERA | Created by Sanskriti Mittal.</div>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+(function(){
+  // mobile nav
+  var b=document.getElementById('burger'),l=document.getElementById('links');
+  b.addEventListener('click',function(){var o=l.classList.toggle('open');b.setAttribute('aria-expanded',o)});
+  l.addEventListener('click',function(e){if(e.target.tagName==='A')l.classList.remove('open')});
+
+  // reveal on scroll
+  var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12}):null;
+  document.querySelectorAll('.rv').forEach(function(el){io?io.observe(el):el.classList.add('in')});
+
+  // upload previews + drag and drop (uses the Flask-WTF generated inputs: #content and #style)
+  function setup(inputId,previewId,nameId,dropId,placeholder){
+    var input=document.getElementById(inputId),prev=document.getElementById(previewId),
+        name=document.getElementById(nameId),drop=document.getElementById(dropId);
+    if(!input)return;
+    function show(){
+      var f=input.files[0];if(!f)return;
+      name.textContent=f.name;
+      var r=new FileReader();
+      r.onload=function(){prev.innerHTML='';var i=document.createElement('img');i.src=r.result;i.alt='Preview of '+f.name;prev.appendChild(i)};
+      r.readAsDataURL(f);
+    }
+    input.addEventListener('change',show);
+    ['dragenter','dragover'].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.add('over')})});
+    ['dragleave','drop'].forEach(function(t){drop.addEventListener(t,function(){drop.classList.remove('over')})});
+    drop.addEventListener('drop',function(e){
+      e.preventDefault();
+      if(e.dataTransfer.files.length){input.files=e.dataTransfer.files;show()}
+    });
+  }
+  setup('content','contentPreview','contentName','dropContent');
+  setup('style','stylePreview','styleName','dropStyle');
+
+  // alpha slider
+  var rg=document.getElementById('alphaRange'),rv=document.getElementById('rangeValue');
+  function upd(){
+    var p=(rg.value-(rg.min||0))*100/((rg.max||1)-(rg.min||0));
+    rv.textContent=parseFloat(rg.value).toFixed(1);
+    rg.style.background='linear-gradient(90deg,#E79BCF 0%,#8B7EE4 '+p+'%,#d9cde3 '+p+'%,#d9cde3 100%)';
+  }
+  if(rg){rg.addEventListener('input',upd);upd()}
+
+  // processing overlay (form still submits normally)
+  var form=document.getElementById('uploadForm');
+  form.addEventListener('submit',function(){
+    var c=document.getElementById('content'),s=document.getElementById('style');
+    if((c&&c.files.length)&&(s&&s.files.length))document.getElementById('loader').classList.add('on');
+  });
+  window.addEventListener('pageshow',function(){document.getElementById('loader').classList.remove('on')});
+
+  // before/after slider
+  var cr=document.getElementById('cmpRange'),cm=document.getElementById('cmp');
+  if(cr)cr.addEventListener('input',function(){cm.style.setProperty('--pos',cr.value+'%')});
+
+  // result: scroll into view + create another
+  var rs=document.getElementById('resultSection');
+  if(rs)rs.scrollIntoView({behavior:'smooth'});
+
+  // browser-local history
+  var KEY='aethera_history',box=document.getElementById('histBox');
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
+  function save(a){try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}}
+  (function(){
+    var rs2=document.getElementById('resultSection');if(!rs2)return;
+    var url=rs2.getAttribute('data-url'),h=load();
+    if(url&&!h.some(function(x){return x.url===url})){h.unshift({url:url,t:Date.now()});save(h.slice(0,8))}
+  })();
+  function render(){
+    var h=load();box.innerHTML='';
+    if(!h.length){box.innerHTML='<div class="empty">No transformations yet. Generate your first artwork above and it will appear here.</div>';return}
+    var g=document.createElement('div');g.className='hist';
+    h.forEach(function(x){
+      var a=document.createElement('a');a.href=x.url;a.target='_blank';a.rel='noopener';
+      var i=document.createElement('img');i.src=x.url;i.alt='Past artwork';i.loading='lazy';
+      var d=document.createElement('div');d.className='d';d.textContent=new Date(x.t).toLocaleString()+' · Open';
+      a.appendChild(i);a.appendChild(d);g.appendChild(a);
+    });
+    box.appendChild(g);
+  }
+  document.getElementById('clearHist').addEventListener('click',function(){save([]);render()});
+  render();
+})();
+</script>
+</body>
+</html>
